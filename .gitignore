@@ -1,0 +1,5 @@
+node*/
+.env
+# Logs
+logs
+npm-debug.log*
