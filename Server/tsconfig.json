@@ -4,9 +4,11 @@
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": ".",
-    "strict": true,
-    "esModuleInterop": true
+    "strict": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true
   },
-  "include": ["src", "routes", "models", "controllers"],
+  "include": ["src", "routes", "models", "controllers", "utils", "config", "middleware", ],
   "exclude": ["node_modules", "dist"]
 }

@@ -19,7 +19,7 @@ router.get("/", (req: Request, res: Response) => {
 
         body {
           font-family: 'Josefin Sans', sans-serif;
-          height: 100vh;
+          block-size: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;

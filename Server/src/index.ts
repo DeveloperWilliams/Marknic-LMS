@@ -7,6 +7,11 @@ import connectDB from "../config/dt";
 // Import Routes
 import Home from "../routes/home/home";
 
+// Import auth Routes
+import authRoutes from '../routes/authRoutes';
+import { errorHandler } from '../middleware/errorHandler';
+
+
 dotenv.config(); // Initialize dotenv to load environment variables
 
 const app = express();
@@ -17,6 +22,7 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
 
 // Using Routes
 app.use("/", Home); // Use the Home route for the root path
+app.use('/api/auth', authRoutes);
 
 // Connect to MongoDB and loog the connection status
 connectDB()
