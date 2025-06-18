@@ -17,10 +17,7 @@ import {
   sendRefreshToken,
 } from "../utils/jwt";
 import { generateRandomToken } from "../utils/crypto";
-import {
-  sendVerificationEmail,
-  sendPasswordResetEmail,
-} from "../utils/email";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/email";
 
 // Signup
 export const signup = async (
@@ -56,7 +53,8 @@ export const signup = async (
 
     res.status(201).json({
       status: "success",
-      message: "Account created! Please check your email to verify your account.",
+      message:
+        "Account created! Please check your email to verify your account.",
       accessToken,
       user: {
         id: user._id,
@@ -72,7 +70,7 @@ export const signup = async (
 };
 
 export const login = async (
-  req: Request,
+  req: Request,  
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -80,7 +78,7 @@ export const login = async (
     const { email, password } = req.body;
 
     // Find user by email
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       res.status(401).json({ message: "Invalid credentials" });
       return;
@@ -96,8 +94,9 @@ export const login = async (
     // Check if email is verified
     if (!user.isVerified) {
       // Optional: Resend verification email if needed
-      res.status(403).json({ 
-        message: "Account not verified. Check your email for verification link." 
+      res.status(403).json({
+        message:
+          "Account not verified. Check your email for verification link.",
       });
       return;
     }
@@ -120,9 +119,8 @@ export const login = async (
         email: user.email,
         isVerified: user.isVerified,
         role: user.role,
-      }
+      },
     });
-
   } catch (err) {
     next(err);
   }
@@ -134,9 +132,9 @@ export const resendVerificationEmail = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.userId; // From JWT middleware
+    const { email } = req.body;
 
-    const user = await User.findById(userId);
+    const user = await User.findOne({ email });
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -169,6 +167,61 @@ export const resendVerificationEmail = async (
   }
 };
 
+export const verifyEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      res.status(400).json({ message: "Invalid verification token" });
+      return;
+    }
+
+    // Find the token in the database
+    const verificationToken = await Token.findOne({
+      token,
+      type: "verify",
+      expiresAt: { $gt: new Date() }, // Check if not expired
+    });
+
+    if (!verificationToken) {
+      res
+        .status(400)
+        .json({ message: "Invalid or expired verification token" });
+      return;
+    }
+
+    // Find the user and verify their email
+    const user = await User.findById(verificationToken.userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    // Delete the verification token
+    await Token.deleteOne({ _id: verificationToken._id });
+
+    res.status(200).json({
+      status: "success",
+      message: "Email verified successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const requestPasswordReset = async (
   req: Request,
@@ -215,8 +268,9 @@ export const updatePassword = async (
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.userId; // From access token middleware
+    console.log("User ID from request:", userId);
 
-    const user = await User.findById(userId).select('+password');
+    const user = await User.findById(userId).select("+password");
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -244,3 +298,5 @@ export const updatePassword = async (
     next(err);
   }
 };
+
+

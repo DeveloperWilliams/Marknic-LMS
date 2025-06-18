@@ -8,7 +8,7 @@ import connectDB from "../config/dt";
 import Home from "../routes/home/home";
 
 // Import auth Routes
-import authRoutes from '../routes/authRoutes';
+import authRoutes from '../routes/auth/authRoutes';
 import { errorHandler } from '../middleware/errorHandler';
 
 
